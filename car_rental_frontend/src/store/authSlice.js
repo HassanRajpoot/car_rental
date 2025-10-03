@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from '../services/authService';
 
-// Get user from localStorage
+// Get user/tokens from localStorage
 const user = authService.getUser();
 const token = authService.getToken();
 
 const initialState = {
   user: user,
-  token: token,
+  access: token,
+  refresh: localStorage.getItem('refresh'),
   isAuthenticated: !!token,
   isLoading: false,
   error: null,
@@ -73,7 +74,8 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.access = action.payload.access;
+        state.refresh = action.payload.refresh;
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
@@ -94,7 +96,8 @@ const authSlice = createSlice({
       // Logout
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
-        state.token = null;
+        state.access = null;
+        state.refresh = null;
         state.isAuthenticated = false;
       })
       // Get current user
@@ -108,7 +111,8 @@ const authSlice = createSlice({
       .addCase(getCurrentUser.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
-        state.token = null;
+        state.access = null;
+        state.refresh = null;
         state.isAuthenticated = false;
       });
   },

@@ -1,8 +1,8 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import login, logout
+from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, PasswordChangeSerializer
 from .models import User
 from .permissions import IsOwnerOrAdmin
@@ -16,10 +16,11 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        token, created = Token.objects.get_or_create(user=user)
+        refresh = RefreshToken.for_user(user)
         return Response({
             'user': UserSerializer(user).data,
-            'token': token.key,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
             'message': 'User registered successfully'
         }, status=status.HTTP_201_CREATED)
 
@@ -31,11 +32,13 @@ class LoginView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
+        # Issue JWT tokens
+        refresh = RefreshToken.for_user(user)
         login(request, user)
         return Response({
             'user': UserSerializer(user).data,
-            'token': token.key,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
             'message': 'Login successful'
         })
 
@@ -43,10 +46,6 @@ class LogoutView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        try:
-            request.user.auth_token.delete()
-        except:
-            pass
         logout(request)
         return Response({'message': 'Logout successful'})
 

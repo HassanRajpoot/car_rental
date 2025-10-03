@@ -4,14 +4,20 @@ const authService = {
   // Register new user
   register: async (userData) => {
     const response = await apiClient.post('/register/', userData);
+    if (response.data.access && response.data.refresh) {
+      localStorage.setItem('access', response.data.access);
+      localStorage.setItem('refresh', response.data.refresh);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
     return response.data;
   },
 
   // Login user
   login: async (credentials) => {
     const response = await apiClient.post('/login/', credentials);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
+    if (response.data.access && response.data.refresh) {
+      localStorage.setItem('access', response.data.access);
+      localStorage.setItem('refresh', response.data.refresh);
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
     return response.data;
@@ -22,7 +28,8 @@ const authService = {
     try {
       await apiClient.post('/logout/');
     } finally {
-      localStorage.removeItem('token');
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
       localStorage.removeItem('user');
     }
   },
@@ -41,7 +48,7 @@ const authService = {
 
   // Get token from localStorage
   getToken: () => {
-    return localStorage.getItem('token');
+    return localStorage.getItem('access');
   },
 
   // Get user from localStorage
