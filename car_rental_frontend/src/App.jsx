@@ -15,6 +15,7 @@ import Register from './pages/Register';
 import CarList from './pages/CarList';
 import CarDetail from './pages/CarDetail';
 import BookingList from './pages/BookingList';
+import BookingDetail from './pages/BookingDetail';
 import Profile from './pages/Profile';
 import Dashboard from './pages/Dashboard';
 
@@ -72,6 +73,16 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <BookingList />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bookings/:id"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <BookingDetail />
                   </Layout>
                 </ProtectedRoute>
               }
