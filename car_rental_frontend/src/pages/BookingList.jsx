@@ -1,6 +1,6 @@
 import { useBookings, useCancelBooking } from '../hooks/useBookings';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { Calendar, Car, DollarSign, MapPin } from 'lucide-react';
+import { Calendar, Car, DollarSign, MapPin, X } from 'lucide-react';
 import { formatDateTime, formatCurrency, getStatusColor } from '../utils/helpers';
 import { useState } from 'react';
 
@@ -8,17 +8,25 @@ const BookingList = () => {
   const { data, isLoading, error } = useBookings();
   const cancelBooking = useCancelBooking();
   const [cancellingId, setCancellingId] = useState(null);
+  const [confirmId, setConfirmId] = useState(null);
+  const [actionError, setActionError] = useState('');
 
-  const handleCancel = async (bookingId) => {
-    if (window.confirm('Are you sure you want to cancel this booking?')) {
-      setCancellingId(bookingId);
-      try {
-        await cancelBooking.mutateAsync(bookingId);
-      } catch (error) {
-        alert('Failed to cancel booking: ' + error.message);
-      } finally {
-        setCancellingId(null);
-      }
+  const handleCancel = (bookingId) => {
+    setActionError('');
+    setConfirmId(bookingId);
+  };
+
+  const confirmCancel = async () => {
+    if (!confirmId) return;
+    setCancellingId(confirmId);
+    setActionError('');
+    try {
+      await cancelBooking.mutateAsync(confirmId);
+      setConfirmId(null);
+    } catch (e) {
+      setActionError(e?.message || 'Failed to cancel booking');
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -61,6 +69,11 @@ const BookingList = () => {
         </div>
       ) : (
         <div className="space-y-4">
+          {actionError && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+              {actionError}
+            </div>
+          )}
           {bookings.map((booking) => (
             <div
               key={booking.id}
@@ -114,6 +127,42 @@ const BookingList = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Confirm Cancel Modal */}
+      {confirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="relative bg-white w-full max-w-md rounded-lg shadow-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Cancel booking?</h3>
+              <button
+                onClick={() => setConfirmId(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to cancel this booking? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmId(null)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-md hover:bg-gray-200"
+              >
+                Keep Booking
+              </button>
+              <button
+                onClick={confirmCancel}
+                disabled={cancellingId === confirmId}
+                className="px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 disabled:opacity-50"
+              >
+                {cancellingId === confirmId ? 'Cancelling...' : 'Confirm Cancel'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
