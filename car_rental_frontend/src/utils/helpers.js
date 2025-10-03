@@ -73,6 +73,8 @@ export const truncate = (text, length = 100) => {
 
 // Handle API errors
 export const getErrorMessage = (error) => {
+  if (!error) return 'An error occurred';
+  if (typeof error === 'string') return error;
   if (error.response?.data) {
     const data = error.response.data;
     if (typeof data === 'string') return data;

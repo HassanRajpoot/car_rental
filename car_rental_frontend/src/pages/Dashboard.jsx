@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useCars, useCreateCar, useUpdateCar, useDeleteCar } from '../hooks/useCars';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
-import { formatCurrency, getErrorMessage } from '../utils/helpers';
+import { formatCurrency, getErrorMessage, getStatusColor } from '../utils/helpers';
 
 const Dashboard = () => {
   const { data, isLoading } = useCars();
@@ -422,7 +422,7 @@ const Dashboard = () => {
                       {formatCurrency(car.price_per_day)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getErrorMessage(car.status)}`}>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(car.status)}`}>
                         {car.status}
                       </span>
                     </td>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { usePopularCars } from '../hooks/useCars';
 import CarCard from '../components/CarCard';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -6,6 +7,7 @@ import { Search, Shield, Clock, DollarSign } from 'lucide-react';
 
 const Home = () => {
   const { data: popularCars, isLoading } = usePopularCars();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   return (
     <div>
@@ -86,22 +88,24 @@ const Home = () => {
         )}
       </div>
 
-      {/* CTA Section */}
-      <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white rounded-2xl p-12 md:p-16 text-center overflow-hidden shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20"></div>
-        <div className="relative">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Ready to Hit the Road?</h2>
-          <p className="text-lg md:text-xl mb-8 text-gray-300 max-w-2xl mx-auto">
-            Join thousands of satisfied customers and book your car today!
-          </p>
-          <Link
-            to="/register"
-            className="inline-block bg-indigo-600 text-white font-bold px-10 py-4 rounded-xl hover:bg-indigo-700 hover:scale-105 transition-all duration-200 shadow-lg"
-          >
-            Get Started
-          </Link>
+      {/* CTA Section (hidden when authenticated) */}
+      {!isAuthenticated && (
+        <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white rounded-2xl p-12 md:p-16 text-center overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20"></div>
+          <div className="relative">
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Ready to Hit the Road?</h2>
+            <p className="text-lg md:text-xl mb-8 text-gray-300 max-w-2xl mx-auto">
+              Join thousands of satisfied customers and book your car today!
+            </p>
+            <Link
+              to="/register"
+              className="inline-block bg-indigo-600 text-white font-bold px-10 py-4 rounded-xl hover:bg-indigo-700 hover:scale-105 transition-all duration-200 shadow-lg"
+            >
+              Get Started
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
